@@ -76,7 +76,7 @@ func callStudentRequestBlock(name string, company string) {
 	if err != nil {
 		print(err)
 	}
-	resp, err := http.Post("http://student-consensus-go-final.apps.us-east-1.starter.openshift-online.com/handlerequest",
+	resp, err := http.Post("http://localhost:8081/handlerequest",
 		"application/json", bytes.NewBuffer(reqBody))
 	if err != nil {
 		print(err)
@@ -120,7 +120,7 @@ func callprintUsage(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	port := "8080"
+	port := "8082"
 	http.HandleFunc("/company", calladdCompany)
 	http.HandleFunc("/request", callrequestBlock)
 	http.HandleFunc("/companyRetrieveData", callcompanyRetrieveData)
