@@ -7,8 +7,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jugalw13/company-go-node/Init"
-	"github.com/jugalw13/company-go-node/company"
+	"github.com/go-ready-blockchain/blockchain-go-core/Init"
+	"github.com/go-ready-blockchain/blockchain-go-core/company"
 )
 
 func printUsage() {
