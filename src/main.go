@@ -26,20 +26,6 @@ func addCompany(company string) {
 }
 func request(w http.ResponseWriter, r *http.Request) {
 
-	type jsonBody struct {
-		Company      string `json:"company"`
-		Backlog      string `json:"backlog"`
-		StarOffer    string `json:"starOffer"`
-		Branch       string `json:"branch"`
-		Gender       string `json:"gender"`
-		CgpaCond     string `json:"cgpaCond"`
-		Cgpa         string `json:"cgpa"`
-		Perc10thCond string `json:"perc10thCond"`
-		Perc10th     string `json:"perc10th"`
-		Perc12thCond string `json:"perc12thCond"`
-		Perc12th     string `json:"perc12th"`
-	}
-
 	fmt.Println("Sending Request to Placement Dept!")
 	resp, err := http.Post("http://localhost:8084/send",
 		"application/json", r.Body)
