@@ -7,8 +7,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jugalw13/company-go-node/Init"
-	"github.com/jugalw13/company-go-node/company"
+	"github.com/go-ready-blockchain/blockchain-go-core/Init"
+	"github.com/go-ready-blockchain/blockchain-go-core/company"
 )
 
 func printUsage() {
@@ -23,6 +23,19 @@ func addCompany(company string) {
 	Init.InitCompanyNode(company)
 	fmt.Println("Company Added!")
 
+}
+func request(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println("Sending Request to Placement Dept!")
+	resp, err := http.Post("http://localhost:8084/send",
+		"application/json", r.Body)
+	if err != nil {
+		print(err)
+	}
+	defer resp.Body.Close()
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte("Request Sent!"))
 }
 
 func companyRetrieveData(name string, companyname string) bool {
@@ -62,9 +75,11 @@ func callrequestBlock(w http.ResponseWriter, r *http.Request) {
 	if err := decoder.Decode(&b); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("\nStarting Request Pipeline\n")
-	fmt.Println("\n\nSending Notification to Student for Requested Block\n\n")
-	callStudentRequestBlock(b.Name, b.Company)
+	//TODO: SendEmail(name,company)
+	message := "\n\nSent Email to Student: " + b.Name + " for Requested Data for Company: " + b.Company + "\n\n"
+	fmt.Println(message)
+	w.Write([]byte(message))
+	//callStudentRequestBlock(b.Name, b.Company)
 
 }
 
@@ -76,7 +91,7 @@ func callStudentRequestBlock(name string, company string) {
 	if err != nil {
 		print(err)
 	}
-	resp, err := http.Post("http://student-consensus-go-final.apps.us-east-1.starter.openshift-online.com/handlerequest",
+	resp, err := http.Post("http://localhost:8081/handlerequest",
 		"application/json", bytes.NewBuffer(reqBody))
 	if err != nil {
 		print(err)
@@ -120,9 +135,10 @@ func callprintUsage(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	port := "8080"
+	port := "8082"
 	http.HandleFunc("/company", calladdCompany)
-	http.HandleFunc("/request", callrequestBlock)
+	http.HandleFunc("/request", request)
+	http.HandleFunc("/requestStudent", callrequestBlock)
 	http.HandleFunc("/companyRetrieveData", callcompanyRetrieveData)
 	http.HandleFunc("/usage", callprintUsage)
 	fmt.Printf("Server listening on localhost:%s\n", port)
