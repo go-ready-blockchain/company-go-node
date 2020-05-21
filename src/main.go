@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-ready-blockchain/blockchain-go-core/Init"
 	"github.com/go-ready-blockchain/blockchain-go-core/company"
+	"github.com/go-ready-blockchain/blockchain-go-core/logger"
 )
 
 func printUsage() {
@@ -25,6 +27,10 @@ func addCompany(company string) {
 
 }
 func request(w http.ResponseWriter, r *http.Request) {
+	name := time.Now().String()
+	logger.FileName = "Company Request" + name + ".log"
+	logger.NodeName = "Company Node"
+	logger.CreateFile()
 
 	fmt.Println("Sending Request to Placement Dept!")
 	resp, err := http.Post("http://localhost:8084/send",
@@ -33,6 +39,10 @@ func request(w http.ResponseWriter, r *http.Request) {
 		print(err)
 	}
 	defer resp.Body.Close()
+
+	logger.UploadToS3Bucket(logger.NodeName)
+
+	logger.DeleteFile()
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte("Request Sent!"))
@@ -50,6 +60,11 @@ func companyRetrieveData(name string, companyname string) bool {
 }
 
 func calladdCompany(w http.ResponseWriter, r *http.Request) {
+	name := time.Now().String()
+	logger.FileName = "Add Company" + name + ".log"
+	logger.NodeName = "Company Node"
+	logger.CreateFile()
+
 	type jsonBody struct {
 		Company string `json:"company"`
 	}
@@ -60,12 +75,21 @@ func calladdCompany(w http.ResponseWriter, r *http.Request) {
 	}
 	addCompany(b.Company)
 
+	logger.UploadToS3Bucket(logger.NodeName)
+
+	logger.DeleteFile()
+
 	message := "Company Added!"
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(message))
 }
 
 func callrequestBlock(w http.ResponseWriter, r *http.Request) {
+	name := time.Now().String()
+	logger.FileName = "Company Request Block" + name + ".log"
+	logger.NodeName = "Company Node"
+	logger.CreateFile()
+
 	type jsonBody struct {
 		Name    string `json:"name"`
 		Company string `json:"company"`
@@ -76,11 +100,15 @@ func callrequestBlock(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	//TODO: SendEmail(name,company)
+
+	logger.UploadToS3Bucket(logger.NodeName)
+
+	logger.DeleteFile()
+
 	message := "\n\nSent Email to Student: " + b.Name + " for Requested Data for Company: " + b.Company + "\n\n"
 	fmt.Println(message)
 	w.Write([]byte(message))
 	//callStudentRequestBlock(b.Name, b.Company)
-
 }
 
 func callStudentRequestBlock(name string, company string) {
@@ -105,6 +133,11 @@ func callStudentRequestBlock(name string, company string) {
 }
 
 func callcompanyRetrieveData(w http.ResponseWriter, r *http.Request) {
+	name := time.Now().String()
+	logger.FileName = "Company Retrieve Data" + name + ".log"
+	logger.NodeName = "Company Node"
+	logger.CreateFile()
+
 	type jsonBody struct {
 		Name    string `json:"name"`
 		Company string `json:"company"`
@@ -122,6 +155,11 @@ func callcompanyRetrieveData(w http.ResponseWriter, r *http.Request) {
 	} else {
 		message = "Company failed to retrieve the data!"
 	}
+
+	logger.UploadToS3Bucket(logger.NodeName)
+
+	logger.DeleteFile()
+
 	w.Write([]byte(message))
 }
 
