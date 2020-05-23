@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -15,9 +14,9 @@ import (
 
 func printUsage() {
 	fmt.Println("Usage:")
-	fmt.Println("company -name NAME \tAddCompany")
-	fmt.Println("request -company COMPANY -student USN \tCompany requests for Student's Data")
-	fmt.Println("companyRetrieveData -student USN \tCompany retrieves Student's data")
+	fmt.Println("Make POST request to /company \tTo Add Company")
+	fmt.Println("Make POST request to /request \tTo Send Request to Placement Dept for Eligible Students based on Eligibility Criteria")
+	fmt.Println("Make POST request to /companyRetrieveData \tCompany retrieves Student's data")
 
 }
 
@@ -84,54 +83,6 @@ func calladdCompany(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(message))
 }
 
-func callrequestBlock(w http.ResponseWriter, r *http.Request) {
-	name := time.Now().String()
-	logger.FileName = "Company Request Block" + name + ".log"
-	logger.NodeName = "Company Node"
-	logger.CreateFile()
-
-	type jsonBody struct {
-		Name    string `json:"name"`
-		Company string `json:"company"`
-	}
-	decoder := json.NewDecoder(r.Body)
-	var b jsonBody
-	if err := decoder.Decode(&b); err != nil {
-		log.Fatal(err)
-	}
-	//TODO: SendEmail(name,company)
-
-	logger.UploadToS3Bucket(logger.NodeName)
-
-	logger.DeleteFile()
-
-	message := "\n\nSent Email to Student: " + b.Name + " for Requested Data for Company: " + b.Company + "\n\n"
-	fmt.Println(message)
-	w.Write([]byte(message))
-	//callStudentRequestBlock(b.Name, b.Company)
-}
-
-func callStudentRequestBlock(name string, company string) {
-	reqBody, err := json.Marshal(map[string]string{
-		"name":    name,
-		"company": company,
-	})
-	if err != nil {
-		print(err)
-	}
-	resp, err := http.Post("http://localhost:8081/handlerequest",
-		"application/json", bytes.NewBuffer(reqBody))
-	if err != nil {
-		print(err)
-	}
-	defer resp.Body.Close()
-	// body, err := ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	print(err)
-	// }
-	// fmt.Println(string(body))
-}
-
 func callcompanyRetrieveData(w http.ResponseWriter, r *http.Request) {
 	name := time.Now().String()
 	logger.FileName = "Company Retrieve Data" + name + ".log"
@@ -176,7 +127,6 @@ func main() {
 	port := "8082"
 	http.HandleFunc("/company", calladdCompany)
 	http.HandleFunc("/request", request)
-	http.HandleFunc("/requestStudent", callrequestBlock)
 	http.HandleFunc("/companyRetrieveData", callcompanyRetrieveData)
 	http.HandleFunc("/usage", callprintUsage)
 	fmt.Printf("Server listening on localhost:%s\n", port)
