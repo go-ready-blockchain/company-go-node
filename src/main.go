@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
+	"os"
+	
 
 	"github.com/go-ready-blockchain/blockchain-go-core/Init"
 	"github.com/go-ready-blockchain/blockchain-go-core/company"
-	"github.com/go-ready-blockchain/blockchain-go-core/logger"
+	
 )
 
 func printUsage() {
@@ -26,22 +27,26 @@ func addCompany(company string) {
 
 }
 func request(w http.ResponseWriter, r *http.Request) {
-	name := time.Now().String()
-	logger.FileName = "Company Request" + name + ".log"
-	logger.NodeName = "Company Node"
-	logger.CreateFile()
+	//name := time.Now().String()
+	//logger.FileName = "Company Request" + name + ".log"
+	//logger.NodeName = "Company Node"
+	//logger.CreateFile()
 
 	fmt.Println("Sending Request to Placement Dept!")
-	resp, err := http.Post("http://localhost:8084/send",
+	Apiurl := os.Getenv("PLACEMENT_URL")
+	Apiurl = Apiurl + "/send"
+	fmt.Println(Apiurl)
+
+	resp, err := http.Post(Apiurl,
 		"application/json", r.Body)
 	if err != nil {
 		print(err)
 	}
 	defer resp.Body.Close()
 
-	logger.UploadToS3Bucket(logger.NodeName)
+	//logger.UploadToS3Bucket(//logger.NodeName)
 
-	logger.DeleteFile()
+	//logger.DeleteFile()
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte("Request Sent!"))
@@ -59,10 +64,10 @@ func companyRetrieveData(name string, companyname string) bool {
 }
 
 func calladdCompany(w http.ResponseWriter, r *http.Request) {
-	name := time.Now().String()
-	logger.FileName = "Add Company" + name + ".log"
-	logger.NodeName = "Company Node"
-	logger.CreateFile()
+	//name := time.Now().String()
+	//logger.FileName = "Add Company" + name + ".log"
+	//logger.NodeName = "Company Node"
+	//logger.CreateFile()
 
 	type jsonBody struct {
 		Company string `json:"company"`
@@ -74,9 +79,9 @@ func calladdCompany(w http.ResponseWriter, r *http.Request) {
 	}
 	addCompany(b.Company)
 
-	logger.UploadToS3Bucket(logger.NodeName)
+	//logger.UploadToS3Bucket(//logger.NodeName)
 
-	logger.DeleteFile()
+	//logger.DeleteFile()
 
 	message := "Company Added!"
 	w.Header().Set("Content-Type", "application/json")
@@ -84,10 +89,10 @@ func calladdCompany(w http.ResponseWriter, r *http.Request) {
 }
 
 func callcompanyRetrieveData(w http.ResponseWriter, r *http.Request) {
-	name := time.Now().String()
-	logger.FileName = "Company Retrieve Data" + name + ".log"
-	logger.NodeName = "Company Node"
-	logger.CreateFile()
+	//name := time.Now().String()
+	//logger.FileName = "Company Retrieve Data" + name + ".log"
+	//logger.NodeName = "Company Node"
+	//logger.CreateFile()
 
 	type jsonBody struct {
 		Name    string `json:"name"`
@@ -107,9 +112,9 @@ func callcompanyRetrieveData(w http.ResponseWriter, r *http.Request) {
 		message = "Company failed to retrieve the data!"
 	}
 
-	logger.UploadToS3Bucket(logger.NodeName)
+	//logger.UploadToS3Bucket(//logger.NodeName)
 
-	logger.DeleteFile()
+	//logger.DeleteFile()
 
 	w.Write([]byte(message))
 }
@@ -124,7 +129,7 @@ func callprintUsage(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	port := "8082"
+	port := "8080"
 	http.HandleFunc("/company", calladdCompany)
 	http.HandleFunc("/request", request)
 	http.HandleFunc("/companyRetrieveData", callcompanyRetrieveData)
